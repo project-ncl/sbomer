@@ -102,7 +102,7 @@ export class SbomerEvent {
   public finished?: Date;
   public status: string;
   public reason: string;
-  public metadata?: object;
+  public metadata?: Map<string, string>;
   public request?: object;
   public generations: SbomerGeneration[] = [];
 
@@ -116,10 +116,11 @@ export class SbomerEvent {
     }
     this.status = payload.status;
     this.reason = payload.reason;
-    this.metadata = payload.metadata;
+    this.metadata = payload.metadata ? new Map(Object.entries(payload.metadata)) : undefined;
     this.request = payload.request;
   }
 }
+
 export type GenerateParams = {
   config: string;
 };
@@ -134,9 +135,7 @@ export type SbomerApi = {
     pageIndex: number;
   }): Promise<{ data: SbomerGeneration[]; total: number }>;
 
-  getManifests(
-    pagination: { pageSize: number; pageIndex: number }
-  ): Promise<{ data: SbomerManifest[]; total: number }>;
+  getManifests(pagination: { pageSize: number; pageIndex: number }): Promise<{ data: SbomerManifest[]; total: number }>;
   getManifestsForGeneration(generationId: string): Promise<{ data: SbomerManifest[]; total: number }>;
 
   getGeneration(id: string): Promise<SbomerGeneration>;

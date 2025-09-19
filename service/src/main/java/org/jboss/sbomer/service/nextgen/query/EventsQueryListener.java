@@ -42,12 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventsQueryListener extends QueryBaseListener {
 
-    // todo refactor, make more generic
     private static final Set<String> VALID_FIELDS = Set
             .of("id", "created", "updated", "finished", "metadata", "status", "reason");
     private static final Set<String> VALID_SORT_FIELDS = Set
             .of("id", "created", "updated", "finished", "status", "reason");
-    private static final Set<String> STRING_FIELDS = Set.of("id", "reason", "metadata");
+    private static final Set<String> VALID_NESTED_FIELDS = Set.of("metadata");
+    private static final Set<String> STRING_FIELDS = Set.of("id", "reason");
     private static final Set<String> COMPARABLE_FIELDS = Set.of("created", "updated", "finished");
 
     private final Stack<String> queryParts = new Stack<>();
@@ -55,12 +55,10 @@ public class EventsQueryListener extends QueryBaseListener {
     private String orderByClause = null;
     private int paramIndex = 0;
 
-    // get full JPQL WHERE clause
     public String getJpqlWhereClause() {
         return queryParts.isEmpty() ? "" : queryParts.peek();
     }
 
-    // get full JPQL ORDER BY clause
     public String getJpqlOrderByClause() {
         return orderByClause != null ? orderByClause : "";
     }
@@ -86,29 +84,28 @@ public class EventsQueryListener extends QueryBaseListener {
     @Override
     public void exitSort(QueryParser.SortContext ctx) {
         String sortField = ctx.field.getText();
-        String sortOrder = "ASC";
+        // only one level of nesting is supported (e.g. metadata.key)
+        String baseSortField = sortField.split("\\.", 2)[0];
 
-        if (ctx.direction != null && ctx.direction.getType() == QueryParser.DESC) {
-            sortOrder = "DESC";
+        if (VALID_NESTED_FIELDS.contains(baseSortField) && sortField.contains(".")) {
+            throw new IllegalArgumentException("Sorting by nested fields is not supported.");
         }
 
-        if (!isValidSortField(sortField)) {
+        if (!VALID_SORT_FIELDS.contains(sortField)) {
             throw new IllegalArgumentException(
                     "Invalid sort field: '" + sortField + "'. Valid fields: " + String.join(", ", VALID_SORT_FIELDS));
         }
 
-        orderByClause = "ORDER BY " + sortField + " " + sortOrder;
-        log.debug("Sort by {} {}", sortField, sortOrder);
-    }
+        String sortOrder = "ASC";
+        if (ctx.direction != null && ctx.direction.getType() == QueryParser.DESC) {
+            sortOrder = "DESC";
+        }
 
-    // supported fields for sorting
-    private boolean isValidSortField(String field) {
-        return VALID_SORT_FIELDS.contains(field);
+        orderByClause = "ORDER BY " + sortField + " " + sortOrder;
     }
 
     @Override
     public void exitTerm(QueryParser.TermContext ctx) {
-        // adding negation when minus is present
         if (ctx.MINUS() != null) {
             String expr = queryParts.pop();
             queryParts.push("(NOT " + expr + ")");
@@ -117,99 +114,96 @@ public class EventsQueryListener extends QueryBaseListener {
 
     @Override
     public void exitAtom(QueryParser.AtomContext ctx) {
-        // parsing the most atomic
-        String field = ctx.WORD().getText();
-        handleValueList(field, ctx.value_list());
-    }
+        String field = ctx.qualified_field().getText();
+        String baseField = field.split("\\.", 2)[0];
 
-    private void handleValueList(String field, QueryParser.Value_listContext ctx) {
-        List<String> values = ctx.value()
+        if (VALID_NESTED_FIELDS.contains(field)) {
+            throw new IllegalArgumentException(
+                "The '" + field + "' field is a nested object and requires a subfield for querying (e.g., '" + field + ".subfield')."
+            );
+        }
+
+        List<String> values = ctx.value_list()
+                .value()
                 .stream()
                 .map(v -> v.WORD() != null ? v.WORD().getText() : unquote(v.STRING().getText()))
                 .collect(Collectors.toList());
 
-        String operator = getOperator(ctx.value(0));
+        String operator = (ctx.value_list().value(0).op == null) ? "=" : ctx.value_list().value(0).op.getText();
 
-        if (values.size() == 1) {
-            handleSingleValue(field, values.get(0), operator);
+        if (VALID_NESTED_FIELDS.contains(baseField)) {
+            handleNestedFieldSearch(baseField, field, values, operator);
         } else {
-            handleMultipleValues(field, values, operator);
+            handleStandardFieldSearch(field, values, operator);
         }
     }
 
-    private String getOperator(QueryParser.ValueContext valueCtx) {
-        if (valueCtx.op == null) {
-            return "="; // default operator when none specified
-        }
-        return valueCtx.op.getType() == QueryParser.CONTAINS ? "LIKE" : valueCtx.op.getText();
-    }
-
-    private void handleSingleValue(String field, String value, String operator) {
-        if (!VALID_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
-        }
-        if (operator.equals("LIKE") && !STRING_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException(
-                    "LIKE operator can only be used with string fields: " + STRING_FIELDS);
-        }
-        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
-                && !COMPARABLE_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException(
-                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
+    private void handleNestedFieldSearch(String baseField, String fullField, List<String> values, String operator) {
+        if (!operator.equals("=")) {
+            throw new UnsupportedOperationException("Only the equals (=) operator is supported for nested fields.");
         }
 
-        Object convertedValue = convertValue(field, value);
+        String key = fullField.substring(baseField.length() + 1);
+        List<String> orClauses = new ArrayList<>();
 
-        if (operator.equals("LIKE")) {
-            convertedValue = "%" + convertedValue + "%";
-        }
-
-        String paramName = nextParamName();
-        parameters.put(paramName, convertedValue);
-        // If metadata is stored as JSON/JsonNode in the entity, cast to text for string operations
-        String fieldExpr = fieldExpression(field);
-        queryParts.push(fieldExpr + " " + operator + " :" + paramName);
-    }
-
-    private void handleMultipleValues(String field, List<String> values, String operator) {
-        if (!VALID_FIELDS.contains(field)) {
-            throw new IllegalArgumentException("Unknown field: '" + field + "'. Valid fields: " + VALID_FIELDS);
-        }
-        if (operator.equals("LIKE")) {
-            throw new UnsupportedOperationException("LIKE operator cannot be used with multiple values");
-        }
-        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
-                && !COMPARABLE_FIELDS.contains(field)) {
-            throw new UnsupportedOperationException(
-                    "Operator '" + operator + "' can only be used with date or number fields: " + COMPARABLE_FIELDS);
-        }
-
-        List<String> paramNames = new ArrayList<>();
         for (String value : values) {
+            String likePattern = "%\"" + key + "\":\"" + value + "\"%";
             String paramName = nextParamName();
-            parameters.put(paramName, convertValue(field, value));
-            paramNames.add(":" + paramName);
+            parameters.put(paramName, likePattern);
+            orClauses.add(String.format("REPLACE(CAST(%s AS text), ' ', '') LIKE :%s", baseField, paramName));
         }
-
-        String fieldExpr = fieldExpression(field);
-        queryParts.push(fieldExpr + " IN (" + String.join(", ", paramNames) + ")");
+        queryParts.push("(" + String.join(" OR ", orClauses) + ")");
     }
 
-    // Return an expression to use for the field in JPQL. For JSON fields (metadata) cast to text so
-    // string operators like LIKE work with Hibernate/JPA.
-    private String fieldExpression(String field) {
-        if ("metadata".equals(field)) {
-            // CAST(... AS text) works with Hibernate/Postgres; adjust if you target a different DB
-            return "CAST(" + field + " AS text)";
-        }
+    private void handleStandardFieldSearch(String field, List<String> values, String operator) {
+        validateFieldAndOperator(field, operator);
 
-        return field; // no change for other fields
+        if (values.size() > 1) {
+            if (operator.equals("~")) {
+                throw new UnsupportedOperationException("LIKE ('~') operator cannot be used with multiple values.");
+            }
+            List<String> paramNames = new ArrayList<>();
+            for (String value : values) {
+                String paramName = nextParamName();
+                parameters.put(paramName, convertValue(field, value));
+                paramNames.add(":" + paramName);
+            }
+            queryParts.push(field + " IN (" + String.join(", ", paramNames) + ")");
+        } else {
+            Object paramValue = convertValue(field, values.get(0));
+            if (operator.equals("~")) {
+                operator = "LIKE";
+                paramValue = "%" + paramValue + "%";
+            }
+            String paramName = nextParamName();
+            parameters.put(paramName, paramValue);
+            queryParts.push(field + " " + operator + " :" + paramName);
+        }
     }
 
-    // parsing field + values
+    private void validateFieldAndOperator(String field, String operator) {
+        if (!VALID_FIELDS.contains(field)) {
+            // **MODIFIED**: Improve the generic "Unknown field" error message.
+            String nonNestedFields = VALID_FIELDS.stream()
+                .filter(f -> !VALID_NESTED_FIELDS.contains(f))
+                .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException(
+                "Unknown field: '" + field + "'. Valid fields are: " + nonNestedFields +
+                ". For nested fields like 'metadata', please specify a subfield (e.g., 'metadata.key')."
+            );
+        }
+        if (operator.equals("~") && !STRING_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException("LIKE ('~') operator is only for string fields: " + STRING_FIELDS);
+        }
+        if ((operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
+                && !COMPARABLE_FIELDS.contains(field)) {
+            throw new UnsupportedOperationException(
+                    "Comparison operators are only for date/number fields: " + COMPARABLE_FIELDS);
+        }
+    }
+
     private Object convertValue(String field, String stringValue) {
         switch (field) {
-            // parsing enum fields
             case "status":
                 try {
                     return EventStatus.valueOf(stringValue.toUpperCase());
@@ -217,23 +211,20 @@ public class EventsQueryListener extends QueryBaseListener {
                     throw new IllegalArgumentException(
                             "Invalid status value. Valid values: " + Arrays.toString(EventStatus.values()));
                 }
-                // parsing date fields
             case "created":
             case "updated":
             case "finished":
                 return parseInstant(stringValue);
             default:
-                // other fields are string
                 return stringValue;
         }
     }
 
-    // parse date formats
     private Instant parseInstant(String stringValue) {
         try {
             return Instant.parse(stringValue);
         } catch (DateTimeParseException e) {
-            // It's not in the standard Instant format
+            // Fallback for yyyy-MM-dd etc.
         }
 
         DateTimeFormatter customFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy")
@@ -261,7 +252,6 @@ public class EventsQueryListener extends QueryBaseListener {
         return (s == null || s.length() < 2) ? s : s.substring(1, s.length() - 1);
     }
 
-    // keeping count of params
     private String nextParamName() {
         return "param" + paramIndex++;
     }

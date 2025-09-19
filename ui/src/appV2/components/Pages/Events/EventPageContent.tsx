@@ -35,18 +35,6 @@ export const EventPageContent = () => {
     return null;
   }
 
-  // recursively flatten nested objects into key=value tags
-  const flattenObject = (obj: any, prefix = ''): Array<{ key: string; value: string }> =>
-    Object.entries(obj).reduce((acc, [k, v]) => {
-      const fullKey = prefix ? `${prefix}.${k}` : k;
-      if (v && typeof v === 'object' && !Array.isArray(v)) {
-        acc.push(...flattenObject(v, fullKey));
-      } else {
-        acc.push({ key: fullKey, value: Array.isArray(v) ? JSON.stringify(v) : String(v) });
-      }
-      return acc;
-    }, [] as Array<{ key: string; value: string }>);
-
   return (
     <Stack gap={7}>
       <Heading>Event {id}</Heading>
@@ -117,8 +105,8 @@ export const EventPageContent = () => {
         <div className="tag-container">
           <Tile>
             <Stack gap={5}></Stack>
-            {request.metadata && typeof request.metadata === 'object' ? (
-              flattenObject(request.metadata).map(({ key, value }) => (
+            {request.metadata && request.metadata.size > 0 ? (
+              Array.from(request.metadata.entries()).map(([key, value]) => (
                 <Tag key={key} size='lg' type='blue'>
                   {key}={value}
                 </Tag>
@@ -135,7 +123,12 @@ export const EventPageContent = () => {
         <CodeSnippet type="multi">
           {JSON.stringify(
             request,
-            (key, value) => (value === undefined ? null : value),
+            (key, value) => {
+              if (value instanceof Map) {
+                return Object.fromEntries(value.entries());
+              }
+              return value;
+            },
             2
           )}
         </CodeSnippet>

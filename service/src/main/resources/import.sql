@@ -3437,7 +3437,7 @@ VALUES (
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
-        '{}',
+        '{"type":"container_image", "website":"https://example.com"}',
         'NEW',
         'Event processed'
 );
@@ -3456,19 +3456,26 @@ VALUES (
         '2020-12-25T00:00:00.000000Z',
         '2022-12-25T00:00:00.000000Z',
         '2024-12-25T00:00:00.000000Z',
-        '{}',
-        'NEW',
+        '{"type":"build"}',
+        'RESOLVED',
         'Some reason'
 );
 
-
-
+INSERT INTO event(
+		id,
+		created,
+        updated,
+        finished,
+        metadata,
+		status,
+        reason
+	)
 VALUES (
         'E0CCCCC',
         '2020-12-25T00:00:00.000000Z',
         '2022-12-25T00:00:00.000000Z',
         '2024-12-25T00:00:00.000000Z',
-        '{}',
+        '{"type":"repository"}',
         'NEW',
         'Some reason'
 );
