@@ -19,9 +19,9 @@ package org.jboss.sbomer.service.rest.api.v1beta1;
 
 import static org.jboss.sbomer.service.feature.sbom.UserRoles.USER_DELETE_ROLE;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
@@ -39,6 +39,7 @@ import org.jboss.sbomer.core.config.request.PncBuildRequestConfig;
 import org.jboss.sbomer.core.config.request.PncOperationRequestConfig;
 import org.jboss.sbomer.core.config.request.RequestConfig;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.errors.ClientException;
 import org.jboss.sbomer.core.errors.ErrorResponse;
 import org.jboss.sbomer.core.errors.NotFoundException;
@@ -110,6 +111,9 @@ public class GenerationsV1Beta1 {
     @Inject
     S3StorageHandler s3StorageHandler;
 
+    @Inject
+    ManagedExecutor executor;
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON, YAMLMediaTypes.APPLICATION_JACKSON_YAML })
     @Operation(
@@ -150,7 +154,7 @@ public class GenerationsV1Beta1 {
     @APIResponse(
             responseCode = "202",
             description = "Manifest generation successfully requested",
-            content = @Content(schema = @Schema(implementation = V1Beta1GenerationRecord.class)))
+            content = @Content(schema = @Schema(implementation = V1Beta1RequestRecord.class)))
     @APIResponse(
             responseCode = "400",
             description = "Failed while processing the request, please verify the provided config.",
@@ -168,54 +172,104 @@ public class GenerationsV1Beta1 {
         }
 
         log.info("Validating config: {}", ObjectMapperProvider.json().writeValueAsString(config));
-
         ValidationResult validationResult = requestConfigSchemaValidator.validate(config);
 
         if (!validationResult.isValid()) {
             throw new ClientException("Invalid config", validationResult.getErrors());
         }
 
-        log.info("Provided config is valid!");
+        log.info("Provided config is valid! Scheduling for generation.");
 
-        // Create the Request to be associated with this REST API call event
         RequestEvent request = RestUtils.createRequestFromRestEvent(config, requestContext, Span.current());
 
-        List<SbomGenerationRequest> requests = new ArrayList<>();
+        Runnable asyncTask;
 
         if (config instanceof ErrataAdvisoryRequestConfig) {
-            log.info("New Errata advisory request received");
-            requests.addAll(advisoryService.generateFromAdvisory(request));
+            asyncTask = () -> {
+                try {
+                    log.info("Starting asynchronous for Errata generation request: {}", request.getId());
+                    advisoryService.generateFromAdvisory(request);
+                    log.info("Completed asynchronous for Errata generation request: {}", request.getId());
+                } catch (Exception e) {
+                    log.error("Failed to generate Errata advisory asynchronously for request: {}", request.getId(), e);
+                }
+            };
         } else if (config instanceof PncBuildRequestConfig) {
-            log.info("New PNC build request received");
-
-            requests.add(sbomService.generateFromBuild(request, config, null));
+            asyncTask = () -> {
+                try {
+                    log.info("Starting asynchronous PNC build generation for generation request: {}", request.getId());
+                    sbomService.generateFromBuild(request, config, null);
+                    log.info("Completed asynchronous PNC build generation for generation request: {}", request.getId());
+                } catch (Exception e) {
+                    log.error(
+                            "Failed to generate PNC build asynchronously for generation request: {}",
+                            request.getId(),
+                            e);
+                }
+            };
         } else if (config instanceof PncAnalysisRequestConfig analysisConfig) {
-            log.info("New PNC analysis request received");
-
-            requests.add(
+            asyncTask = () -> {
+                try {
+                    log.info("Starting asynchronous PNC analysis for generation request: {}", request.getId());
                     sbomService.generateNewOperation(
                             request,
                             DeliverableAnalysisConfig.builder()
                                     .withDeliverableUrls(analysisConfig.getUrls())
                                     .withMilestoneId(analysisConfig.getMilestoneId())
-                                    .build()));
+                                    .build());
+                    log.info("Completed asynchronous PNC analysis for generation request:  {}", request.getId());
+                } catch (Exception e) {
+                    log.error(
+                            "Failed to generate PNC analysis asynchronously for generation request: {}",
+                            request.getId(),
+                            e);
+                }
+            };
         } else if (config instanceof ImageRequestConfig imageConfig) {
-            log.info("New container image request received");
-
-            requests.add(
+            asyncTask = () -> {
+                try {
+                    log.info("Starting asynchronous container image for generation request: {}", request.getId());
                     sbomService.generateSyftImage(
                             request,
-                            SyftImageConfig.builder().withImage(imageConfig.getImage()).build()));
+                            SyftImageConfig.builder().withImage(imageConfig.getImage()).build());
+                    log.info("Completed asynchronous container image for generation request: {}", request.getId());
+                } catch (Exception e) {
+                    log.error(
+                            "Failed to generate container image asynchronously for generation request: {}",
+                            request.getId(),
+                            e);
+                }
+            };
         } else if (config instanceof PncOperationRequestConfig operationConfig) {
-            log.info("New PNC operation request received");
-
-            requests.add(
+            asyncTask = () -> {
+                try {
+                    log.info("Starting asynchronous PNC operation for generation request: {}", request.getId());
                     sbomService.generateFromOperation(
                             request,
-                            OperationConfig.builder().withOperationId(operationConfig.getOperationId()).build()));
+                            OperationConfig.builder().withOperationId(operationConfig.getOperationId()).build());
+                    log.info("Completed asynchronous PNC operation for generation request: {}", request.getId());
+                } catch (Exception e) {
+                    log.error(
+                            "Failed to generate PNC operation asynchronously for generation request: {}",
+                            request.getId(),
+                            e);
+                }
+            };
+        } else {
+            // This case should ideally not be hit if validation is exhaustive
+            log.error("Unknown config type received: {}", config.getClass().getName());
+            throw new ClientException("Unsupported config type: " + config.getClass().getName());
         }
 
-        return Response.accepted(mapper.requestsToRecords(requests)).build();
+        executor.submit(asyncTask);
+
+        /*
+         * We don't want to hang around waiting for generations to start, this was mainly an issue for big Erratum with
+         * lots of builds.
+         *
+         * The request handle can be used by the client to track the gneration progress
+         */
+        return Response.accepted(request).build();
     }
 
     @GET

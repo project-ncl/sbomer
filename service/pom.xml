@@ -181,6 +181,12 @@
       <artifactId>opentelemetry-jdbc</artifactId>
     </dependency>
     <dependency>
+    <groupId>io.quarkiverse.wiremock</groupId>
+    <artifactId>quarkus-wiremock</artifactId>
+    <version>1.5.1</version>
+    <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>io.quarkiverse.tektonclient</groupId>
       <artifactId>quarkus-tekton-client</artifactId>
       <version>${version.tekton-client}</version>
