@@ -109,13 +109,12 @@ public abstract class E2EBase {
             }
 
             final String status = jsonPath.getString("eventStatus");
-            final String identifier = jsonPath.getString("requestConfig.identifier");
+            final String requestConfig  = jsonPath.getString("requestConfig");
 
             log.info(
-                    "Generation '{}' (type: '{}', identifier: '{}') current status: {}",
+                    "Generation '{}' (requestConfig '{}') current status: {}",
                     requestId,
-                    type,
-                    identifier,
+                    requestConfig,
                     status);
 
             if ("[FAILED]".equals(status)) {
@@ -275,7 +274,7 @@ public abstract class E2EBase {
 
     public List<String> generationIdsFromRequest(String requestID) {
         final Response response = getRequest(requestID);
-        //Flatten and dedupe the generation IDs we get back
+        // Flatten and dedupe the generation IDs we get back
         List<String> ids = response.jsonPath().getList("manifests.generation.id.flatten()");
         return ids.stream().distinct().collect(Collectors.toList());
     }
