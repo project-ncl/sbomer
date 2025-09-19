@@ -132,25 +132,33 @@ public class EventsQueryListener extends QueryBaseListener {
         String operator = (ctx.value_list().value(0).op == null) ? "=" : ctx.value_list().value(0).op.getText();
 
         if (VALID_NESTED_FIELDS.contains(baseField)) {
-            handleNestedFieldSearch(baseField, field, values, operator);
+            handleNestedFieldSearch(field, values, operator);
         } else {
             handleStandardFieldSearch(field, values, operator);
         }
     }
 
-    private void handleNestedFieldSearch(String baseField, String fullField, List<String> values, String operator) {
+    private void handleNestedFieldSearch(String fullField, List<String> values, String operator) {
         if (!operator.equals("=")) {
-            throw new UnsupportedOperationException("Only the equals (=) operator is supported for nested fields.");
+            throw new UnsupportedOperationException("Only equals (=) operator is supported for nested fields.");
         }
 
-        String key = fullField.substring(baseField.length() + 1);
+        String[] parts = fullField.split("\\.", 2);
+        if (parts.length != 2 || parts[1].isEmpty()) {
+            throw new IllegalArgumentException("Nested field must be in the format 'metadata.subfield'.");
+        }
+        String baseField = parts[0];
+        String key = parts[1];
+
+        // is platform dependent - works for PostgreSQL
+        String functionCall = String.format("FUNCTION('jsonb_extract_path_text', %s, '%s')", baseField, key);
+
         List<String> orClauses = new ArrayList<>();
 
         for (String value : values) {
-            String likePattern = "%\"" + key + "\":\"" + value + "\"%";
             String paramName = nextParamName();
-            parameters.put(paramName, likePattern);
-            orClauses.add(String.format("REPLACE(CAST(%s AS text), ' ', '') LIKE :%s", baseField, paramName));
+            parameters.put(paramName, value);
+            orClauses.add(String.format("%s = :%s", functionCall, paramName));
         }
         queryParts.push("(" + String.join(" OR ", orClauses) + ")");
     }
@@ -183,7 +191,6 @@ public class EventsQueryListener extends QueryBaseListener {
 
     private void validateFieldAndOperator(String field, String operator) {
         if (!VALID_FIELDS.contains(field)) {
-            // **MODIFIED**: Improve the generic "Unknown field" error message.
             String nonNestedFields = VALID_FIELDS.stream()
                 .filter(f -> !VALID_NESTED_FIELDS.contains(f))
                 .collect(Collectors.joining(", "));
