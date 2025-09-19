@@ -65,15 +65,14 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     @Test
     void testMultiArchImage() throws IOException {
         String requestBody = Files.readString(sbomPath("mandrel-image.json"));
-        List<String> generationIds = requestGeneration(requestBody);
-
+        String requestId = requestGeneration(requestBody);
+        waitForRequest(requestId);
+        List<String> generationIds = generationIdsFromRequest(requestId);
         assertEquals(1, generationIds.size());
 
         String generationId = generationIds.get(0);
 
         log.info("Mandrel container image - Generation Request created: {}", generationId);
-
-        waitForGeneration(generationId);
 
         // TODO: UMB check disabled, because we do not add product coordinates anymore which control if we should send
         // UMB message
@@ -104,7 +103,9 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
     @ParameterizedTest
     @MethodSource("requestBodies")
     void testSkinnyManifests(JsonObject requestBody) {
-        List<String> generationIds = requestGeneration(requestBody.toString());
+        String requestId = requestGeneration(requestBody.toString());
+        waitForRequest(requestId);
+        List<String> generationIds = generationIdsFromRequest(requestId);
         assertEquals(1, generationIds.size());
         String generationId = generationIds.get(0);
 
@@ -112,8 +113,6 @@ class ContainerImageGenerationRequestIT extends E2EStageBase {
                 "{} container image - Generation Request created: {}",
                 requestBody.getValue("/image").toString(),
                 generationId);
-
-        waitForGeneration(generationId);
 
         final Response response = getManifestsForGeneration(generationId);
         assertTrue((response.body().jsonPath().getInt("totalHits") > 0));
