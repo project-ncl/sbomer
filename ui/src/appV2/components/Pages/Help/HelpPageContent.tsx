@@ -1,10 +1,7 @@
 import {
   Accordion,
   AccordionItem,
-  Button,
   CodeSnippet,
-  Column,
-  Grid,
   Heading,
   Stack,
   Tab,
@@ -20,10 +17,10 @@ import {
   Tabs
 } from '@carbon/react';
 import React from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import { QueryExample } from './QueryExample';
 
 export const HelpPageContent = () => {
-  const navigate = useNavigate();
   return (
     <Stack gap={7}>
       <Stack gap={5}>
@@ -170,125 +167,17 @@ export const HelpPageContent = () => {
 
                 <TabPanel>
                   <Stack>
-                    <p>Find all new events</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">status:NEW</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=status:NEW" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find new events that do not include the substring "some"</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">status:NEW -reason:~"some"</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to={'/events?query=status:NEW%20-reason:~"some"' } size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events processed after the start of 2024</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">finished:&gt;=2024</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=finished:%3E=2024" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Show new or processed events, sorted by oldest first</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=status:NEW,PROCESSED%20sort:created:asc" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events updated in September 2025</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">updated:&gt;=2023-09-01 updated:&lt;2025-10-01</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=updated:%3E=2023-09-01%20updated:%3C2025-10-01" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events with a specific ID</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">id:E0AAAAA</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=id:E0AAAAA" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events where the reason contains "network"</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">reason:~"processed"</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to={'/events?query=reason:~"processed"'} size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find all events except those with status ERROR</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">-status:ERROR</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=-status:ERROR" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events created before September 2025</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">created:&lt;2025-09</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=created:%3C2025-09" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Sort events by finished date, newest first</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">sort:finished:desc</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=sort:finished:desc" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events for a specific metadata type</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">metadata.type:build</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=metadata.type:build" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
-
-                    <p>Find events which HAVE the metadata subfield, but not the specific value</p>
-                    <Grid narrow>
-                      <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">-metadata.type:container_image</CodeSnippet>
-                      </Column>
-                      <Column sm={2} md={2} lg={4}>
-                        <Button as={RouterLink} to="/events?query=-metadata.type:container_image" size='md' kind='primary'>Run Query</Button>
-                      </Column>
-                    </Grid>
+                    <QueryExample description="Find events for a specific metadata type" query="metadata.type:PROCESS" />
+                    <QueryExample description="Find all new events" query="status:NEW" />
+                    <QueryExample description="Find failed events that were not a timeout" query='status:ERROR -reason:~"timeout"' />
+                    <QueryExample description="Find events processed after the start of 2025" query="finished:>=2025" />
+                    <QueryExample description="Show new or processed events, sorted by oldest first" query="status:NEW,PROCESSED sort:created:asc" />
+                    <QueryExample description="Find events updated in September 2025" query="updated:>=2025-09-01 updated:<2025-10-01" />
+                    <QueryExample description="Find events with a specific ID" query="id:E0AAAAA" />
+                    <QueryExample description='Find events where the reason contains "network"' query='reason:~"network"' />
+                    <QueryExample description="Find all events except those with status ERROR" query="-status:ERROR" />
+                    <QueryExample description="Find events created before September 2025" query="created:<2025-09" />
+                    <QueryExample description="Sort events by finished date, newest first" query="sort:finished:desc" />
                   </Stack>
                 </TabPanel>
               </TabPanels>
