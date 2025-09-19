@@ -49,13 +49,13 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     @Disabled("Container image not accessible anymore, need to find new image/advisory")
     void testContainerGenerationOfQEAdvisory() throws IOException {
         String requestBody = Files.readString(sbomPath("advisory-88484.json"));
-        List<String> generationIds = requestGeneration(requestBody);
+        String requestId = requestGeneration(requestBody);
+        waitForRequest(requestId);
+        List<String> generationIds = generationIdsFromRequest(requestId);
         assertEquals(1, generationIds.size());
         String generationId = generationIds.get(0);
 
         log.info("Advisory in QE status with Container - Generation Request created: {}", generationId);
-
-        waitForGeneration(generationId);
 
         final Response response = getManifestsForGeneration(generationId);
 
@@ -71,13 +71,13 @@ class AdvisoryGenerationRequestIT extends E2EStageBase {
     @Test
     void testRPMGenerationOfQEAdvisory() throws IOException {
         String requestBody = Files.readString(sbomPath("advisory-89769.json"));
-        List<String> generationIds = requestGeneration(requestBody);
+        String requestId = requestGeneration(requestBody);
+        waitForRequest(requestId);
+        List<String> generationIds = generationIdsFromRequest(requestId);
         assertEquals(1, generationIds.size());
-        String generationId = generationIds.get(0);
+        String generationId = generationIds.get(0).toString();
 
         log.info("Advisory in QE status with RPMs - Generation Request created: {}", generationId);
-
-        waitForGeneration(generationId);
 
         final Response response = getManifestsForGeneration(generationId);
 
