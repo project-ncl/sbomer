@@ -83,6 +83,11 @@ export const HelpPageContent = () => {
                           <TableCell><Stack orientation='horizontal'>
                             <code>2025</code><code>2025-09</code><code>2025-09-05</code><code>2025-09-05T11:12:37Z</code></Stack></TableCell>
                         </TableRow>
+                        <TableRow>
+                          <TableCell><code>metadata.subfield</code></TableCell>
+                          <TableCell>String</TableCell>
+                          <TableCell><code>metadata.type:build</code></TableCell>
+                        </TableRow>
                       </TableBody>
                     </Table>
 
@@ -104,6 +109,8 @@ export const HelpPageContent = () => {
                           <TableCell>Exact match</TableCell>
                           <TableCell>
                             <CodeSnippet type="inline">status:NEW</CodeSnippet>
+                            <br />
+                            <CodeSnippet type="inline">metadata.type:build</CodeSnippet>
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -117,7 +124,7 @@ export const HelpPageContent = () => {
                         </TableRow>
                         <TableRow>
                           <TableCell>
-                            <Stack orientation='horizontal'>
+                            <Stack orientation='horizontal' >
                               <code>:&gt;=</code>
                               <code>:&lt;=</code>
                               <code>:&lt;</code>
@@ -169,27 +176,27 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">status:NEW</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:NEW')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=status:NEW" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
-                    <p>Find failed events that were not a timeout</p>
+                    <p>Find new events that do not include the substring "some"</p>
                     <Grid narrow>
                       <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">status:ERROR -reason:~"timeout"</CodeSnippet>
+                        <CodeSnippet type="single">status:NEW -reason:~"some"</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:ERROR%20-reason:~%22timeout%22')}>Run Query</Button>
+                        <Button as={RouterLink} to={'/events?query=status:NEW%20-reason:~"some"' } size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
-                    <p>Find events processed after the start of 2025</p>
+                    <p>Find events processed after the start of 2024</p>
                     <Grid narrow>
                       <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">finished:&gt;=2025</CodeSnippet>
+                        <CodeSnippet type="single">finished:&gt;=2024</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=finished:%3E=2025')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=finished:%3E=2024" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
@@ -199,17 +206,17 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">status:NEW,PROCESSED sort:created:asc</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=status:NEW,PROCESSED%20sort:created:asc')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=status:NEW,PROCESSED%20sort:created:asc" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
                     <p>Find events updated in September 2025</p>
                     <Grid narrow>
                       <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">updated:&gt;=2025-09-01 updated:&lt;2025-10-01</CodeSnippet>
+                        <CodeSnippet type="single">updated:&gt;=2023-09-01 updated:&lt;2025-10-01</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=updated:%3E=2025-09-01%20updated:%3C2025-10-01')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=updated:%3E=2023-09-01%20updated:%3C2025-10-01" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
@@ -219,17 +226,17 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">id:E0AAAAA</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=id:E0AAAAA')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=id:E0AAAAA" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
                     <p>Find events where the reason contains "network"</p>
                     <Grid narrow>
                       <Column sm={2} md={6} lg={12}>
-                        <CodeSnippet type="single">reason:~"network"</CodeSnippet>
+                        <CodeSnippet type="single">reason:~"processed"</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=reason:~%22network%22')}>Run Query</Button>
+                        <Button as={RouterLink} to={'/events?query=reason:~"processed"'} size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
@@ -239,7 +246,7 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">-status:ERROR</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=-status:ERROR')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=-status:ERROR" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
@@ -249,7 +256,7 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">created:&lt;2025-09</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=created:%3C2025-09')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=created:%3C2025-09" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
 
@@ -259,7 +266,27 @@ export const HelpPageContent = () => {
                         <CodeSnippet type="single">sort:finished:desc</CodeSnippet>
                       </Column>
                       <Column sm={2} md={2} lg={4}>
-                        <Button size='md' kind='primary' onClick={() => navigate('/events?query=sort:finished:desc')}>Run Query</Button>
+                        <Button as={RouterLink} to="/events?query=sort:finished:desc" size='md' kind='primary'>Run Query</Button>
+                      </Column>
+                    </Grid>
+
+                    <p>Find events for a specific metadata type</p>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">metadata.type:build</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button as={RouterLink} to="/events?query=metadata.type:build" size='md' kind='primary'>Run Query</Button>
+                      </Column>
+                    </Grid>
+
+                    <p>Find events which HAVE the metadata subfield, but not the specific value</p>
+                    <Grid narrow>
+                      <Column sm={2} md={6} lg={12}>
+                        <CodeSnippet type="single">-metadata.type:container_image</CodeSnippet>
+                      </Column>
+                      <Column sm={2} md={2} lg={4}>
+                        <Button as={RouterLink} to="/events?query=-metadata.type:container_image" size='md' kind='primary'>Run Query</Button>
                       </Column>
                     </Grid>
                   </Stack>
