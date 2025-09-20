@@ -43,6 +43,7 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const location = useLocation();
+  // enables the sidebar to be expanded by default instead of using the sidenav prop
   const [sideNavExpanded, setSideNavExpanded] = React.useState(true);
   const [menuPanelExpanded, setMenuPanelExpanded] = React.useState(false);
 
@@ -104,22 +105,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         ) : null
         )}
       </SideNavMenu>
-      <SideNavDivider />
+        <SideNavDivider />
       </>
     );
   };
 
   const Navigation = (
-   <SideNavItems>
-    {routes
-      .filter(route => route.label && route.label !== 'Help')
-      .map((route, idx) =>
-        !route.routes
-          ? renderSideNavLink(route, idx)
-          : renderSideNavGroup(route, idx)
-      )}
-
     <SideNavItems>
+      {routes
+        .filter(route => route.label && route.label !== 'Help')
+        .map((route, idx) =>
+          !route.routes
+            ? renderSideNavLink(route, idx)
+            : renderSideNavGroup(route, idx)
+        )}
+
       <SideNavDivider />
       <SideNavLink
         key="help-link"
@@ -128,112 +128,103 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         as={NavLink}
         to="/help"
         large
-        tabIndex={2}
       >
         Help
       </SideNavLink>
     </SideNavItems>
-  </SideNavItems>
   );
-  const headerContainer = <>
-    <HeaderContainer
-      render={({ onClickSideNavExpand }) => (
-        <>
-          <SkipToContent href="#main-content">Skip to content</SkipToContent>
-          <Header aria-label="SBOMER">
-            <HeaderMenuButton
-              aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
-              onClick={() => {
-                setSideNavExpanded(!sideNavExpanded);
-                onClickSideNavExpand();
-              }}
-              isActive={sideNavExpanded}
-              isCollapsible={true}
-            />
-            <HeaderName prefix="" href="/nextgen">SBOMer</HeaderName>
-
-            <HeaderGlobalBar>
-              <HeaderGlobalAction
-                aria-label="Options"
-                isActive={menuPanelExpanded}
-                onClick={() => setMenuPanelExpanded(!menuPanelExpanded)}
-                tooltipAlignment="end"
-              >
-                <SwitcherIcon size={20} />
-              </HeaderGlobalAction>
-            </HeaderGlobalBar>
-
-          </Header>
-
-          <HeaderPanel aria-label="Application Switcher" expanded={menuPanelExpanded}>
-            <Layer>
-              <CarbonSwitcher aria-label="Switcher Container">
-                <ContainedList label="Navigation" kind="on-page">
-                  <ContainedListItem
-                    onClick={() => {
-                      window.location.href = '/';
-                      setMenuPanelExpanded(false);
-                    }}
-                  >
-                    Switch to SBOMer Classic
-                  </ContainedListItem>
-                </ContainedList>
-
-                <ContainedList label="Appearance" kind="on-page">
-                  <ContainedListItem>
-                    <Select
-                      id="theme-select"
-                      labelText="Theme"
-                      hideLabel
-                      size="sm"
-                      value={currentTheme}
-                      onChange={(e) => {
-                        const newTheme = e.target.value as 'white' | 'g10' | 'g90' | 'g100';
-                        setCurrentTheme(newTheme);
-                        localStorage.setItem('sbomer-theme', newTheme);
-                        setMenuPanelExpanded(false);
-                      }}
-                    >
-                      <SelectItem value="white" text="White (Light)" />
-                      <SelectItem value="g10" text="Gray 10 (Light)" />
-                      <SelectItem value="g90" text="Gray 90 (Dark)" />
-                      <SelectItem value="g100" text="Gray 100 (Darkest)" />
-                    </Select>
-                  </ContainedListItem>
-                </ContainedList>
-              </CarbonSwitcher>
-            </Layer>
-          </HeaderPanel>
-          <SideNav
-            aria-label="Side navigation"
-            expanded={sideNavExpanded}
-            isFixedNav
-            isPersistent
-            isRail
-            isChildOfHeader
-          >
-            {Navigation}
-          </SideNav>
-
-        </>
-      )}
-    />
-  </>
-
-  const content =<Content id="main-content">
-    <Grid>
-      <Column sm={4} md={8} lg={16}>
-        {children}
-      </Column>
-    </Grid>
-  </Content>
-  ;
-
   return (
     <Theme theme={currentTheme}>
       <div className='page-wrapper'>
-        {headerContainer}
-        {content}
+        <HeaderContainer
+          render={({ onClickSideNavExpand }) => (
+            <>
+              <SkipToContent href="#main-content">Skip to content</SkipToContent>
+              <Header aria-label="SBOMER">
+                <HeaderMenuButton
+                  aria-label={sideNavExpanded ? 'Close menu' : 'Open menu'}
+                  onClick={() => {
+                    setSideNavExpanded(!sideNavExpanded);
+                    onClickSideNavExpand();
+                  }}
+                  isActive={sideNavExpanded}
+                  isCollapsible={true}
+                />
+                <HeaderName prefix="" href="/nextgen">SBOMer</HeaderName>
+
+                <HeaderGlobalBar>
+                  <HeaderGlobalAction
+                    aria-label="Options"
+                    isActive={menuPanelExpanded}
+                    onClick={() => setMenuPanelExpanded(!menuPanelExpanded)}
+                    tooltipAlignment="end"
+                  >
+                    <SwitcherIcon size={20} />
+                  </HeaderGlobalAction>
+                </HeaderGlobalBar>
+
+              </Header>
+
+              <HeaderPanel aria-label="Application Switcher" expanded={menuPanelExpanded}>
+                <Layer>
+                  <CarbonSwitcher aria-label="Switcher Container">
+                    <ContainedList label="Navigation" kind="on-page">
+                      <ContainedListItem
+                        onClick={() => {
+                          window.location.href = '/';
+                          setMenuPanelExpanded(false);
+                        }}
+                      >
+                        Switch to SBOMer Classic
+                      </ContainedListItem>
+                    </ContainedList>
+
+                    <ContainedList label="Appearance" kind="on-page">
+                      <ContainedListItem>
+                        <Select
+                          id="theme-select"
+                          labelText="Theme"
+                          hideLabel
+                          size="sm"
+                          value={currentTheme}
+                          onChange={(e) => {
+                            const newTheme = e.target.value as 'white' | 'g10' | 'g90' | 'g100';
+                            setCurrentTheme(newTheme);
+                            localStorage.setItem('sbomer-theme', newTheme);
+                            setMenuPanelExpanded(false);
+                          }}
+                        >
+                          <SelectItem value="white" text="White (Light)" />
+                          <SelectItem value="g10" text="Gray 10 (Light)" />
+                          <SelectItem value="g90" text="Gray 90 (Dark)" />
+                          <SelectItem value="g100" text="Gray 100 (Darkest)" />
+                        </Select>
+                      </ContainedListItem>
+                    </ContainedList>
+                  </CarbonSwitcher>
+                </Layer>
+              </HeaderPanel>
+              <SideNav
+                aria-label="Side navigation"
+                expanded={sideNavExpanded}
+                isFixedNav
+                isPersistent
+                isRail
+                isChildOfHeader
+              >
+                {Navigation}
+              </SideNav>
+
+            </>
+          )}
+        />
+        <Content id="main-content">
+          <Grid>
+            <Column sm={4} md={8} lg={16}>
+              {children}
+            </Column>
+          </Grid>
+        </Content>
       </div>
     </Theme>
   );

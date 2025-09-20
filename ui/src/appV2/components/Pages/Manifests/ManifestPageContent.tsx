@@ -100,7 +100,7 @@ const ManifestPageContent: React.FunctionComponent = () => {
         </ButtonSet>
 
         <Stack gap={5}>
-          <Heading>Attributes</Heading>
+          <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
             {JSON.stringify(manifest, null, 2)}
           </CodeSnippet>

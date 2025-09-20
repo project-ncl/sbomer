@@ -9,7 +9,7 @@ import {
 import * as React from 'react';
 
 const Dashboard: React.FunctionComponent = () => {
-  useDocumentTitle("SBOMER | Dashboard");
+  useDocumentTitle("SBOMer | Dashboard");
 
   return (
     <AppLayout>

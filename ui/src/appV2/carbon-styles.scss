@@ -1,1 +1,6 @@
 @use '@carbon/styles';
+
+.tag-container {
+  display: flex;
+  align-items: flex-start;
+}

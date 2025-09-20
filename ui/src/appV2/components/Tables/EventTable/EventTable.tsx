@@ -51,6 +51,10 @@ export const EventTable = () => {
 
   const [querySearchbarValue, setQuerySearchbarValue] = React.useState<string>(query || '');
 
+  React.useEffect(() => {
+    setQuerySearchbarValue(query || '');
+  }, [query]);
+
   const [{ value, loading, total, error }] = useRequestEvents();
 
   const onSetPage = (newPage: number) => {

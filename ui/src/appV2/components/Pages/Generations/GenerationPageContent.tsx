@@ -107,7 +107,7 @@ const GenerationPageContent: React.FunctionComponent = () => {
         </StructuredListBody>
       </StructuredListWrapper>
         <Stack gap={5}>
-          <Heading>Attributes</Heading>
+          <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
             {JSON.stringify(request, null, 2)}
           </CodeSnippet>

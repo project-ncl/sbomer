@@ -117,6 +117,7 @@ public class Event extends PanacheEntityBase {
      */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", nullable = false)
+    @Schema(implementation = Map.class)
     private Map<String, String> metadata;
 
     /**

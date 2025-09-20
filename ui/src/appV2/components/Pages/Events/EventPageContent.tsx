@@ -10,6 +10,7 @@ import {
   StructuredListRow,
   StructuredListWrapper,
   Tag,
+  Tile
 } from '@carbon/react';
 
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
@@ -35,73 +36,103 @@ export const EventPageContent = () => {
   }
 
   return (
-    <Stack gap={50}>
+    <Stack gap={7}>
       <Heading>Event {id}</Heading>
-        <StructuredListWrapper isCondensed>
-               <StructuredListHead>
-                <StructuredListRow head>
-                  <StructuredListCell head>Property</StructuredListCell>
-                  <StructuredListCell head>Value</StructuredListCell>
-                </StructuredListRow>
-              </StructuredListHead>
-              <StructuredListBody>
-                <StructuredListRow>
-                  <StructuredListCell>ID</StructuredListCell>
-                  <StructuredListCell>
-                    <span>
-                      {id}
-                    </span>
-                  </StructuredListCell>
-                </StructuredListRow>
-                <StructuredListRow>
-                  <StructuredListCell>Created</StructuredListCell>
-                  <StructuredListCell>
-                    {request.created ? (
-                      <Stack gap={2}>
-                        <RelativeTimestamp date={request.created} />
-                        <span>{request.created.toISOString()}</span>
-                      </Stack>
-                    ) : 'N/A'}
-                  </StructuredListCell>
-                </StructuredListRow>
-                <StructuredListRow>
-                  <StructuredListCell>Updated</StructuredListCell>
-                  <StructuredListCell>
-                    {request.updated ? (
-                      <Stack gap={2}>
-                        <RelativeTimestamp date={request.updated} />
-                        <span>{request.updated.toISOString()}</span>
-                      </Stack>
-                    ) : 'N/A'}
-                  </StructuredListCell>
-                </StructuredListRow>
-                <StructuredListRow>
-                  <StructuredListCell>Finished</StructuredListCell>
-                  <StructuredListCell>
-                    {request.finished ? (
-                      <Stack gap={2}>
-                        <RelativeTimestamp date={request.finished} />
-                        <p>{request.finished.toISOString()}</p>
-                      </Stack>
-                    ) : 'N/A'}
-                  </StructuredListCell>
-                </StructuredListRow>
-                <StructuredListRow>
-                  <StructuredListCell>Status</StructuredListCell>
-                  <StructuredListCell>
-                    <Tag size='md' type={eventStatusToColor(request.status)}>
-                      {request.status}
-                    </Tag>
-                  </StructuredListCell>
-                </StructuredListRow>
-              </StructuredListBody>
-            </StructuredListWrapper>
-        <Stack gap={5}>
-          <Heading>Attributes</Heading>
-          <CodeSnippet type="multi">
-            {JSON.stringify(request, null, 2)}
-          </CodeSnippet>
-        </Stack>
+      <StructuredListWrapper isCondensed>
+        <StructuredListHead>
+          <StructuredListRow head>
+            <StructuredListCell head>Property</StructuredListCell>
+            <StructuredListCell head>Value</StructuredListCell>
+          </StructuredListRow>
+        </StructuredListHead>
+        <StructuredListBody>
+          <StructuredListRow>
+            <StructuredListCell>ID</StructuredListCell>
+            <StructuredListCell>
+              <span>
+                {id}
+              </span>
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Created</StructuredListCell>
+            <StructuredListCell>
+              {request.created ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.created} />
+                  <span>{request.created.toISOString()}</span>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Updated</StructuredListCell>
+            <StructuredListCell>
+              {request.updated ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.updated} />
+                  <span>{request.updated.toISOString()}</span>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Finished</StructuredListCell>
+            <StructuredListCell>
+              {request.finished ? (
+                <Stack gap={2}>
+                  <RelativeTimestamp date={request.finished} />
+                  <p>{request.finished.toISOString()}</p>
+                </Stack>
+              ) : 'N/A'}
+            </StructuredListCell>
+          </StructuredListRow>
+          <StructuredListRow>
+            <StructuredListCell>Status</StructuredListCell>
+            <StructuredListCell>
+              <Tag size='md' type={eventStatusToColor(request.status)}>
+                {request.status}
+              </Tag>
+            </StructuredListCell>
+          </StructuredListRow>
+        </StructuredListBody>
+      </StructuredListWrapper>
+
+
+      <Stack gap={5}>
+        <Heading>Metadata Overview</Heading>
+
+        <div className="tag-container">
+          <Tile>
+            <Stack gap={5}></Stack>
+            {request.metadata && request.metadata.size > 0 ? (
+              Array.from(request.metadata.entries()).map(([key, value]) => (
+                <Tag key={key} size='lg' type='blue'>
+                  {key}={value}
+                </Tag>
+              ))
+            ) : (
+              <p>No metadata available</p>
+            )}
+          </Tile>
+        </div>
       </Stack>
+
+      <Stack gap={5}>
+        <Heading>Raw JSON</Heading>
+        <CodeSnippet type="multi">
+          {JSON.stringify(
+            request,
+            (key, value) => {
+              if (value instanceof Map) {
+                return Object.fromEntries(value.entries());
+              }
+              return value;
+            },
+            2
+          )}
+        </CodeSnippet>
+      </Stack>
+    </Stack>
   );
 };
