@@ -23,6 +23,7 @@ import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.awaitility.Awaitility;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import lombok.Data;
@@ -88,6 +90,42 @@ public abstract class E2EBase {
         }
 
         return uri;
+    }
+
+    /*
+     * This also means we will await completion of generations
+     */
+    protected void waitForRequest(String requestId, long time, TimeUnit unit) {
+        Awaitility.await().atMost(time, unit).pollInterval(10, TimeUnit.SECONDS).until(() -> {
+            final Response response = getRequest(requestId);
+            final JsonPath jsonPath = response.body().jsonPath();
+
+            final String type = jsonPath.getString("requestConfig.type");
+
+            if (type == null) {
+                // The request type hasn't got a manifest/generation attached yet, continue to poll
+                log.info("Generation '{}': 'requestConfig.type' not available yet, continuing to poll...", requestId);
+                return false;
+            }
+
+            final String status = jsonPath.getString("eventStatus");
+            final String requestConfig = jsonPath.getString("requestConfig");
+
+            log.info("Generation '{}' (requestConfig '{}') current status: {}", requestId, requestConfig, status);
+
+            if ("[FAILED]".equals(status)) {
+                log.error("Generation '{}' failed: {}", requestId, response.asPrettyString());
+                throw new Exception(String.format("GenerationRequest '%s' failed, see logs above", requestId));
+            }
+
+            return "[SUCCESS]".equals(status);
+        });
+
+        log.info("Generation '{}' successfully finished", requestId);
+    }
+
+    protected void waitForRequest(String generationRequestId) {
+        waitForRequest(generationRequestId, 30, TimeUnit.MINUTES);
     }
 
     protected void waitForGeneration(String generationRequestId) {
@@ -167,6 +205,23 @@ public abstract class E2EBase {
         consumer.accept(atomicResponse.get());
     }
 
+    public Response getRequest(String requestId) {
+        log.info("Fetching request with id '{}'", requestId);
+
+        Response response = RestAssured.given()
+                .baseUri(getSbomerBaseUri())
+                .contentType(ContentType.JSON)
+                .pathParam("id", requestId)
+                .log()
+                .all()
+                .when()
+                .get("/api/v1beta1/requests/id={id}");
+
+        log.info("Got request: {}", response.body().asPrettyString());
+
+        return response;
+    }
+
     public Response getGeneration(String generationId) {
         log.info("Fetching generation with id '{}'", generationId);
 
@@ -195,7 +250,7 @@ public abstract class E2EBase {
         return response;
     }
 
-    public List<String> requestGeneration(String jsonBody) {
+    public String requestGeneration(String jsonBody) {
         log.info("Requesting generation of manifest with jsonBody: {}", jsonBody);
 
         Response response = RestAssured.given()
@@ -210,6 +265,13 @@ public abstract class E2EBase {
 
         log.info("Got request generation: {}", response.body().asPrettyString());
 
-        return response.jsonPath().getList("id");
+        return response.jsonPath().getString("id");
+    }
+
+    public List<String> generationIdsFromRequest(String requestID) {
+        final Response response = getRequest(requestID);
+        // Flatten and dedupe the generation IDs we get back
+        List<String> ids = response.jsonPath().getList("manifests.generation.id.flatten()");
+        return ids.stream().distinct().collect(Collectors.toList());
     }
 }

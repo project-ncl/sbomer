@@ -18,12 +18,14 @@
 package org.jboss.sbomer.service.rest.mapper;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.jboss.sbomer.core.dto.BaseSbomRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseGenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1BaseManifestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1GenerationRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1ManifestRecord;
+import org.jboss.sbomer.core.dto.v1beta1.V1Beta1RequestRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsDeploymentRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsMessagingRecord;
@@ -31,6 +33,7 @@ import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResource
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceManifestsRecord;
 import org.jboss.sbomer.core.dto.v1beta1.V1Beta1StatsRecord.V1Beta1StatsResourceRecord;
 import org.jboss.sbomer.core.features.sbom.rest.Page;
+import org.jboss.sbomer.service.feature.sbom.model.RequestEvent;
 import org.jboss.sbomer.service.feature.sbom.model.Sbom;
 import org.jboss.sbomer.service.feature.sbom.model.SbomGenerationRequest;
 import org.jboss.sbomer.service.feature.sbom.model.Stats;
@@ -43,12 +46,12 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = MapperConfig.class)
+@Mapper(config = MapperConfig.class, imports = Collections.class)
 public interface V1Beta1Mapper extends EntityMapper<V1Beta1ManifestRecord, V1Beta1GenerationRecord> {
 
     @Override
     @Mapping(target = "generation", source = "sbom.generationRequest")
-    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    @BeanMapping(ignoreUnmappedSourceProperties = { "persistent", "releaseMetadata" })
     V1Beta1ManifestRecord toRecord(Sbom sbom);
 
     Page<V1Beta1ManifestRecord> sbomsToBaseRecordPage(Page<Sbom> sboms);
@@ -63,6 +66,11 @@ public interface V1Beta1Mapper extends EntityMapper<V1Beta1ManifestRecord, V1Bet
 
     @Mapping(target = "generation", source = "generationRequest")
     V1Beta1BaseManifestRecord toRecord(BaseSbomRecord baseSbom);
+
+    // We will never have manifests when this DTO is returned, instead have an empty list
+    @Mapping(target = "manifests", expression = "java(Collections.emptyList())")
+    @BeanMapping(ignoreUnmappedSourceProperties = "persistent")
+    V1Beta1RequestRecord toRecord(RequestEvent requestEvent);
 
     Page<V1Beta1BaseManifestRecord> toRecord(Page<BaseSbomRecord> sboms);
 

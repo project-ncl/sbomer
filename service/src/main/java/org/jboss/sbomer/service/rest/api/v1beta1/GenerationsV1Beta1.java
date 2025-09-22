@@ -269,7 +269,7 @@ public class GenerationsV1Beta1 {
          *
          * The request handle can be used by the client to track the gneration progress
          */
-        return Response.accepted(request).build();
+        return Response.accepted(mapper.toRecord(request)).build();
     }
 
     @GET
