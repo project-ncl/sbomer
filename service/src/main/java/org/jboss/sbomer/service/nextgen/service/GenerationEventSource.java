@@ -22,6 +22,7 @@ import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_FLAGS
 import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_ID_KEY;
 import static org.jboss.sbomer.core.features.sbom.utils.MDCUtils.MDC_TRACE_STATE_KEY;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +39,6 @@ import org.jboss.sbomer.service.nextgen.core.utils.ConfigUtils;
 import org.jboss.sbomer.service.nextgen.service.model.Generation;
 import org.jboss.sbomer.service.scheduler.GenerationSchedulerConfig;
 import org.slf4j.MDC;
-
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -161,10 +160,10 @@ public class GenerationEventSource {
         generations.forEach(g -> {
             g.setStatus(GenerationStatus.SCHEDULED);
             g.setReason("Scheduled for execution for {}", deploymentInfo);
-            g.setMetadata(
-                    Optional.ofNullable(g.getMetadata())
-                            .orElse(JsonNodeFactory.instance.objectNode())
-                            .put(DEPLOYMENT_KEY, deploymentInfo));
+
+            Map<String, String> metadata = new HashMap<>(Optional.ofNullable(g.getMetadata()).orElse(Map.of()));
+            metadata.put(DEPLOYMENT_KEY, deploymentInfo);
+            g.setMetadata(metadata);
             g.save();
 
             Arc.container().beanManager().getEvent().fire(new GenerationStatusChangeEvent(mapper.toRecord(g)));

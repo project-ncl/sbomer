@@ -65,7 +65,7 @@ export class SbomerGeneration {
   public updated?: Date;
   public finished?: Date;
   public request?: object;
-  public metadata?: object;
+  public metadata?: Map<string, string>;
 
   constructor(payload: any) {
     this.id = payload.id;
