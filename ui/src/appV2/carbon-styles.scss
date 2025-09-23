@@ -13,15 +13,10 @@
   overflow: visible;
   display: inline-flex;
   align-items: center;
-  cursor: pointer !important;
+  cursor: pointer;
 }
 
 .tag-link,
 .tag-link * {
-  cursor: pointer;
-}
-
-.tag-tooltip,
-.tag-tooltip * {
   cursor: pointer;
 }

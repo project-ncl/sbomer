@@ -23,7 +23,6 @@ export const MetadataOverview: React.FC<MetadataOverviewProps> = ({ metadata, re
                 label={`${key}:${value}`}
                 align="top-start"
                 enterDelayMs={500}
-                className="tag-tooltip"
               >
                 <Tag
                   as={Link}
