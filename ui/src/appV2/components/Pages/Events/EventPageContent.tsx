@@ -10,14 +10,15 @@ import {
   StructuredListRow,
   StructuredListWrapper,
   Tag,
-  Tile
+  Tile,
+  Tooltip
 } from '@carbon/react';
 
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { eventStatusToColor } from '@appV2/utils/Utils';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 export const EventPageContent = () => {
   const { id } = useParams<{ id: string }>();
@@ -104,12 +105,19 @@ export const EventPageContent = () => {
 
         <div className="tag-container">
           <Tile>
-            <Stack gap={5}></Stack>
             {request.metadata && request.metadata.size > 0 ? (
               Array.from(request.metadata.entries()).map(([key, value]) => (
-                <Tag key={key} size='lg' type='blue'>
-                  {key}={value}
-                </Tag>
+                <Tooltip key={`${key}-${value}`} label={`${key}:${value}`} align="top-start"  enterDelayMs={500} >
+                  <Tag
+                    as={Link}
+                    size='lg'
+                    type='blue'
+                    to={`/events?query=metadata.${key}:"${value}"`}
+                    className='tag-link'
+                  >
+                    {key}:{value}
+                  </Tag>
+                </Tooltip>
               ))
             ) : (
               <p>No metadata available</p>
