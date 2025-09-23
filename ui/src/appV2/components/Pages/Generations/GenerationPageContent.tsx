@@ -111,7 +111,16 @@ const GenerationPageContent: React.FunctionComponent = () => {
         <Stack gap={5}>
           <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
-            {JSON.stringify(request, null, 2)}
+            {JSON.stringify(
+            request,
+            (key, value) => {
+              if (value instanceof Map) {
+                return Object.fromEntries(value.entries());
+              }
+              return value;
+            },
+            2
+          )}
           </CodeSnippet>
         </Stack>
     </Stack>
