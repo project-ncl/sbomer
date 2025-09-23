@@ -3437,7 +3437,7 @@ VALUES (
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
         '2023-12-25T00:00:00.000000Z',
-        '{"type":"container_image", "website":"https://example.com"}',
+        '{"type":"container_image", "website":"https://example.com", "source":"REST:/api/v1beta2/generations"}',
         'NEW',
         'Event processed'
 );
