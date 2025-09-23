@@ -3,12 +3,12 @@ import { Heading, Stack, Tile, Tag, Tooltip } from '@carbon/react';
 import { Link } from 'react-router-dom';
 
 export interface MetadataOverviewProps {
-  metadata?: Map<string, string> | Record<string, string>;
+  metadata?: Map<string, string>;
   redirectPrefix: string;
 }
 
 export const MetadataOverview: React.FC<MetadataOverviewProps> = ({ metadata, redirectPrefix }) => {
-  const metadataEntries = metadata instanceof Map ? Array.from(metadata.entries()) : Object.entries(metadata || {});
+  const metadataEntries = metadata instanceof Map ? Array.from(metadata.entries()) : [];
 
   return (
     <Stack gap={5}>
@@ -30,9 +30,8 @@ export const MetadataOverview: React.FC<MetadataOverviewProps> = ({ metadata, re
                   type="blue"
                   to={`/${redirectPrefix}?query=metadata.${encodeURIComponent(key)}:"${encodeURIComponent(String(value))}"`}
                   className="tag-link"
-                  style={{ cursor: 'pointer' }}
                 >
-                  {key}:{String(value)}
+                  {key}={String(value)}
                 </Tag>
               </Tooltip>
             ))
