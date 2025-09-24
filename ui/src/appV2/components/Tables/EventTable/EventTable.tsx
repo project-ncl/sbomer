@@ -136,7 +136,7 @@ export const EventTable = () => {
     const { message, details } = extractQueryErrorMessageDetails(error);
     return (
       <Tile>
-        <Stack>
+        <Stack gap={5}>
           <Heading>Invalid Query</Heading>
           <p>
             {message || 'Your search query is not valid. Please check your syntax or clear filters to try again.'}
