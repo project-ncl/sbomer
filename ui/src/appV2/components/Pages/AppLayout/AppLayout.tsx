@@ -212,7 +212,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
           </>
         )} />
-        <Content id="main-content">
+        <Content className="main-content">
           <Grid>
             <Column sm={4} md={8} lg={16}>
               {children}
