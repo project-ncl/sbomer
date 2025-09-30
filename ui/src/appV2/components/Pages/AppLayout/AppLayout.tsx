@@ -187,7 +187,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                           const newTheme = e.target.value as 'white' | 'g10' | 'g90' | 'g100';
                           setCurrentTheme(newTheme);
                           localStorage.setItem('sbomer-theme', newTheme);
-                          setMenuPanelExpanded(false);
                         }}
                       >
                         <SelectItem value="white" text="White (Light)" />
