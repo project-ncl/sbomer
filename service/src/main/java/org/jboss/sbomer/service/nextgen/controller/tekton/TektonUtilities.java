@@ -25,8 +25,6 @@ import org.jboss.sbomer.service.feature.sbom.k8s.resources.Labels;
 import org.jboss.sbomer.service.nextgen.core.dto.api.GenerationRequest;
 import org.jboss.sbomer.service.nextgen.core.dto.model.GenerationRecord;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.tekton.v1beta1.TaskRunStepOverride;
@@ -68,20 +66,14 @@ public class TektonUtilities {
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelTraceId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
                 .ifPresent(traceId -> labels.put(Labels.LABEL_OTEL_TRACE_ID, traceId));
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelSpanId"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
                 .ifPresent(spanId -> labels.put(Labels.LABEL_OTEL_SPAN_ID, spanId));
 
         Optional.ofNullable(generation.metadata())
                 .map(meta -> meta.get("otelTraceParent"))
-                .filter(JsonNode::isTextual)
-                .map(JsonNode::asText)
                 .ifPresent(traceParent -> labels.put(Labels.LABEL_OTEL_TRACEPARENT, traceParent));
 
         return labels;
