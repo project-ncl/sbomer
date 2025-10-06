@@ -119,8 +119,8 @@ public class EventsQueryListener extends QueryBaseListener {
 
         if (VALID_NESTED_FIELDS.contains(field)) {
             throw new IllegalArgumentException(
-                "The '" + field + "' field is a nested object and requires a subfield for querying (e.g., '" + field + ".subfield')."
-            );
+                    "The '" + field + "' field is a nested object and requires a subfield for querying (e.g., '" + field
+                            + ".subfield').");
         }
 
         List<String> values = ctx.value_list()
@@ -192,12 +192,11 @@ public class EventsQueryListener extends QueryBaseListener {
     private void validateFieldAndOperator(String field, String operator) {
         if (!VALID_FIELDS.contains(field)) {
             String nonNestedFields = VALID_FIELDS.stream()
-                .filter(f -> !VALID_NESTED_FIELDS.contains(f))
-                .collect(Collectors.joining(", "));
+                    .filter(f -> !VALID_NESTED_FIELDS.contains(f))
+                    .collect(Collectors.joining(", "));
             throw new IllegalArgumentException(
-                "Unknown field: '" + field + "'. Valid fields are: " + nonNestedFields +
-                ". For nested fields like 'metadata', please specify a subfield (e.g., 'metadata.key')."
-            );
+                    "Unknown field: '" + field + "'. Valid fields are: " + nonNestedFields
+                            + ". For nested fields like 'metadata', please specify a subfield (e.g., 'metadata.key').");
         }
         if (operator.equals("~") && !STRING_FIELDS.contains(field)) {
             throw new UnsupportedOperationException("LIKE ('~') operator is only for string fields: " + STRING_FIELDS);

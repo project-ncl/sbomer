@@ -151,8 +151,9 @@ class EventsQueryProcessorTest {
 
     @DisplayName("Should reject invalid nested queries")
     @ParameterizedTest
-    @ValueSource(strings = { "metadata:somevalue", "metadata.type:>somevalue", "metadata.type:>=somevalue",
-            "sort:metadata.type", "metadata.type:~PROCESS" })
+    @ValueSource(
+            strings = { "metadata:somevalue", "metadata.type:>somevalue", "metadata.type:>=somevalue",
+                    "sort:metadata.type", "metadata.type:~PROCESS" })
     void testInvalidNestedQueries(String query) {
         Exception ex = assertThrows(Exception.class, () -> eventsQueryProcessor.process(query));
 
