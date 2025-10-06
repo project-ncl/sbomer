@@ -5,8 +5,9 @@ export const SearchableFieldsTable = () => (
   <Table>
     <TableHead>
       <TableRow>
-        <TableHeader>Field</TableHeader>
+        <TableHeader>Field name</TableHeader>
         <TableHeader>Data Type</TableHeader>
+        <TableHeader>Description</TableHeader>
         <TableHeader>Example Values</TableHeader>
       </TableRow>
     </TableHead>
@@ -14,35 +15,64 @@ export const SearchableFieldsTable = () => (
       <TableRow>
         <TableCell><code>id</code></TableCell>
         <TableCell>String</TableCell>
+        <TableCell>Unique identifier for the record</TableCell>
         <TableCell><code>E0AAAAA</code></TableCell>
       </TableRow>
       <TableRow>
         <TableCell><code>status</code></TableCell>
         <TableCell>Enum</TableCell>
+        <TableCell>Current processing state of the record</TableCell>
         <TableCell>
-          <Stack orientation='horizontal'>
-            <code>NEW</code><code>PROCESSED</code><code>ERROR</code>
+          <Stack gap={6}>
+            <div></div>
+            <code>NEW</code>
+            <code>PROCESSED</code>
+            <code>ERROR</code>
+            <div></div>
           </Stack>
         </TableCell>
       </TableRow>
       <TableRow>
         <TableCell><code>reason</code></TableCell>
         <TableCell>String</TableCell>
+        <TableCell>Human-readable explanation for current status</TableCell>
         <TableCell><code>"Processing failed"</code></TableCell>
       </TableRow>
       <TableRow>
-        <TableCell><code>created</code>, <code>updated</code>, <code>finished</code></TableCell>
+        <TableCell>
+          <Stack gap={6}>
+            <div></div>
+            <code>created</code>
+            <code>updated</code>
+            <code>finished</code>
+            <div></div>
+          </Stack>
+        </TableCell>
         <TableCell>Date/Timestamp</TableCell>
         <TableCell>
-          <Stack orientation='horizontal'>
-            <code>2025</code><code>2025-09</code><code>2025-09-05</code><code>2025-09-05T11:12:37Z</code>
+          Record timestamps. Supports partial dates and comparison operators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>)
+        </TableCell>
+        <TableCell>
+          <Stack gap={6}>
+            <div></div>
+            <code>created:&lt;2025-09-05T11:12:37Z</code>
+            <code>updated:2025</code>
+            <code>finished:&gt;=2025-09-01</code>
+            <div></div>
           </Stack>
         </TableCell>
       </TableRow>
       <TableRow>
         <TableCell><code>metadata.subfield</code></TableCell>
         <TableCell>String</TableCell>
-        <TableCell><code>metadata.type:build</code></TableCell>
+        <TableCell>
+          Nested metadata fields accessed using dot notation.
+        </TableCell>
+        <TableCell>
+          <Stack>
+            <code>metadata.type:build</code>
+          </Stack>
+        </TableCell>
       </TableRow>
     </TableBody>
   </Table>
