@@ -9,11 +9,11 @@ import {
   StructuredListHead,
   StructuredListRow,
   StructuredListWrapper,
-  Tag,
-  Tile
+  Tag
 } from '@carbon/react';
 
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { MetadataOverview } from '@appV2/components/UtilsComponents/MetadataOverview';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { eventStatusToColor } from '@appV2/utils/Utils';
 import React from 'react';
@@ -82,7 +82,7 @@ export const EventPageContent = () => {
               {request.finished ? (
                 <Stack gap={2}>
                   <RelativeTimestamp date={request.finished} />
-                  <p>{request.finished.toISOString()}</p>
+                  <span>{request.finished.toISOString()}</span>
                 </Stack>
               ) : 'N/A'}
             </StructuredListCell>
@@ -97,27 +97,7 @@ export const EventPageContent = () => {
           </StructuredListRow>
         </StructuredListBody>
       </StructuredListWrapper>
-
-
-      <Stack gap={5}>
-        <Heading>Metadata Overview</Heading>
-
-        <div className="tag-container">
-          <Tile>
-            <Stack gap={5}></Stack>
-            {request.metadata && request.metadata.size > 0 ? (
-              Array.from(request.metadata.entries()).map(([key, value]) => (
-                <Tag key={key} size='lg' type='blue'>
-                  {key}={value}
-                </Tag>
-              ))
-            ) : (
-              <p>No metadata available</p>
-            )}
-          </Tile>
-        </div>
-      </Stack>
-
+      <MetadataOverview metadata={request.metadata} redirectPrefix='events'/>
       <Stack gap={5}>
         <Heading>Raw JSON</Heading>
         <CodeSnippet type="multi">

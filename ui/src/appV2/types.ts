@@ -65,7 +65,7 @@ export class SbomerGeneration {
   public updated?: Date;
   public finished?: Date;
   public request?: object;
-  public metadata?: object;
+  public metadata?: Map<string, string>;
 
   constructor(payload: any) {
     this.id = payload.id;
@@ -80,17 +80,19 @@ export class SbomerGeneration {
     this.finished = payload.finished ? new Date(payload.finished) : undefined;
 
     this.request = payload.request;
-    this.metadata = payload.metadata;
+    this.metadata = payload.metadata ? new Map(Object.entries(payload.metadata)) : undefined;
   }
 }
 
 export class SbomerManifest {
   public id: string;
   public created: Date;
+  public metadata?: Map<string, string>;
 
   constructor(payload: any) {
     this.id = payload.id;
     this.created = new Date(payload.created);
+    this.metadata = payload.metadata ? new Map(Object.entries(payload.metadata)) : undefined;
   }
 }
 

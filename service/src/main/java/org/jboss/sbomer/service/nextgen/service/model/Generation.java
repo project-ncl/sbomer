@@ -20,6 +20,7 @@ package org.jboss.sbomer.service.nextgen.service.model;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
@@ -112,7 +113,7 @@ public class Generation extends PanacheEntityBase {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata")
     @ToString.Exclude
-    private ObjectNode metadata;
+    private Map<String, String> metadata;
 
     /**
      * Identifier of the status.

@@ -17,6 +17,7 @@ import {
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useGeneration } from './useGeneration';
+import { MetadataOverview } from '@appV2/components/UtilsComponents/MetadataOverview';
 
 const GenerationPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,7 +84,7 @@ const GenerationPageContent: React.FunctionComponent = () => {
               {request.finished ? (
                 <Stack gap={2}>
                   <RelativeTimestamp date={request.finished} />
-                  <p>{request.finished.toISOString()}</p>
+                  <span>{request.finished.toISOString()}</span>
                 </Stack>
               ) : 'N/A'}
             </StructuredListCell>
@@ -106,10 +107,20 @@ const GenerationPageContent: React.FunctionComponent = () => {
           </StructuredListRow>
         </StructuredListBody>
       </StructuredListWrapper>
+      <MetadataOverview metadata={request.metadata} redirectPrefix='generations'/>
         <Stack gap={5}>
           <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
-            {JSON.stringify(request, null, 2)}
+            {JSON.stringify(
+            request,
+            (key, value) => {
+              if (value instanceof Map) {
+                return Object.fromEntries(value.entries());
+              }
+              return value;
+            },
+            2
+          )}
           </CodeSnippet>
         </Stack>
     </Stack>

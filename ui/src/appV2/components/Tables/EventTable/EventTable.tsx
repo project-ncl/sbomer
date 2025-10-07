@@ -136,7 +136,7 @@ export const EventTable = () => {
     const { message, details } = extractQueryErrorMessageDetails(error);
     return (
       <Tile>
-        <Stack>
+        <Stack gap={5}>
           <Heading>Invalid Query</Heading>
           <p>
             {message || 'Your search query is not valid. Please check your syntax or clear filters to try again.'}
@@ -152,7 +152,7 @@ export const EventTable = () => {
 
 
   return (
-    <DataTable rows={value || []} headers={headers} render={({ rows, headers }) => (
+    <DataTable rows={value || []} headers={headers} children={({ rows, headers }) => (
       <TableContainer title="Events" description="Latest events">
         <TableToolbar>
           <TableToolbarContent>

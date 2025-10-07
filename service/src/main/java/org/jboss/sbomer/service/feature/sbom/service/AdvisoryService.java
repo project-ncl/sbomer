@@ -597,7 +597,7 @@ public class AdvisoryService {
             Errata erratum,
             RequestEvent requestEvent,
             // This is aquired differently for textonly advisories and cpe is used instead
-            Set<String> productVersions, 
+            Set<String> productVersions,
             GenerationRequestType type) {
 
         ObjectNode otelMetadata = ObjectMapperProvider.json().createObjectNode();

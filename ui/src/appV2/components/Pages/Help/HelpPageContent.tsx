@@ -52,7 +52,6 @@ export const HelpPageContent = () => {
 
                 <TabPanel>
                   <Stack>
-                    <QueryExample description="Find events for a specific metadata type" query="metadata.type:PROCESS" />
                     <QueryExample description="Find all new events" query="status:NEW" />
                     <QueryExample description="Find failed events that were not a timeout" query='status:ERROR -reason:~"timeout"' />
                     <QueryExample description="Find events processed after the start of 2025" query="finished:>=2025" />
@@ -63,6 +62,8 @@ export const HelpPageContent = () => {
                     <QueryExample description="Find all events except those with status ERROR" query="-status:ERROR" />
                     <QueryExample description="Find events created before September 2025" query="created:<2025-09" />
                     <QueryExample description="Sort events by finished date, newest first" query="sort:finished:desc" />
+                    <QueryExample description="Find events for a specific metadata type" query="metadata.type:PROCESS" />
+                    <QueryExample description="Find events NOT for a specific metadata type" query="-metadata.type:PROCESS" />
                   </Stack>
                 </TabPanel>
               </TabPanels>

@@ -1,6 +1,7 @@
 import { DefaultSbomerApiV2 } from '@appV2/api/DefaultSbomerApiV2';
 import { useManifest } from '@appV2/components/Pages/Manifests/useManifest';
 import { ErrorSection } from '@appV2/components/Sections/ErrorSection/ErrorSection';
+import { MetadataOverview } from '@appV2/components/UtilsComponents/MetadataOverview';
 import RelativeTimestamp from '@appV2/components/UtilsComponents/RelativeTimestamp';
 import { useDocumentTitle } from '@appV2/utils/useDocumentTitle';
 import { Download } from '@carbon/icons-react';
@@ -18,7 +19,7 @@ import {
   StructuredListWrapper,
 } from '@carbon/react';
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { Meta, useParams } from 'react-router-dom';
 
 const ManifestPageContent: React.FunctionComponent = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,11 +99,21 @@ const ManifestPageContent: React.FunctionComponent = () => {
             Download
           </Button>
         </ButtonSet>
+        <MetadataOverview metadata={manifest.metadata} redirectPrefix="manifests" />
 
         <Stack gap={5}>
           <Heading>Raw JSON</Heading>
           <CodeSnippet type="multi">
-            {JSON.stringify(manifest, null, 2)}
+            {JSON.stringify(
+            manifest,
+            (key, value) => {
+              if (value instanceof Map) {
+                return Object.fromEntries(value.entries());
+              }
+              return value;
+            },
+            2
+          )}
           </CodeSnippet>
         </Stack>
       </Stack>
